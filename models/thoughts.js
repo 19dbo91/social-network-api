@@ -1,2 +1,0 @@
-//Thoughts
-// subdoc reactions
