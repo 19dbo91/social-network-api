@@ -1,7 +1,9 @@
-const {Schema } = require('mongoose');
+const { Schema } = require('mongoose');
+const { reactionSchema } = require('./Reaction')
+
+
+
 //Thoughts
-
-
 const thoughtSchema = new Schema (
     {
         thoughtText: {
@@ -14,8 +16,11 @@ const thoughtSchema = new Schema (
             type: Date,
             default: Date.now,
         },
-        username: [Thought],    // The user that created this thought)
-        friends: [User],        // Array of `_id` values referencing the `User` model (self-reference)
+        username: { // The user that created this thought
+            type: String,
+            required: true,
+        },    
+        reactions: [ reactionSchema ], //Array of nested documents created with the `reactionSchema`
     },
     {
         toJSON: {
@@ -25,10 +30,10 @@ const thoughtSchema = new Schema (
     }
 );
 
-userSchema
-    .virtual('friendCount')
+thoughtSchema
+    .virtual('reactionCount')
     .get( function (){
-        return this.friends.length;
+        return this.reactions.length;
     });
 
 const User = model('User', userSchema);
