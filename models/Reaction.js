@@ -1,4 +1,5 @@
 //! SCHEMA ONLY
+const { Schema } = require('mongoose');
 const reactionSchema = new Schema (
     {
         reactionID: {

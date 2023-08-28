@@ -11,14 +11,14 @@ router
     .post(createThought);
 
 
-//  /api/thoughts/:thoughtID
+//  /api/thoughts/:thoughtId
 router
     .route('/:thoughtId')
     .get(getThought)
     .put(updateThought)
     .delete(deleteThought);
 
-//  /api/thoughts/:thoughtID/reactions
+//  /api/thoughts/:thoughtId/reactions
 router
     .route('/:thoughtId/reactions')
     .post(addToReactions) //username+email

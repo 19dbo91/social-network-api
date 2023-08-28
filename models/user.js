@@ -1,9 +1,9 @@
-const { Schema, Types } = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
 const Thought = require('./Thought');
 
 const userSchema = new Schema (
     {
-        user: {
+        username: {
             type: String,
             required: true,
             trim: true,
@@ -11,7 +11,10 @@ const userSchema = new Schema (
         email: {
             type: String,
             required: true,
-            validate: true,
+            validate: {
+                validator: (value)=>{ value.match(/[A-Z]/g) }, //TODO: 
+                message: 'Please enter a valid email'
+            },
         },
         thoughts: [{ // Array of `_id` values referencing the `Thought` model
             type: Schema.Types.ObjectId,
@@ -36,6 +39,6 @@ userSchema
         return this.friends.length;
     });
 
-const User = model('User', userSchema);
+const User = model('user', userSchema);
 
 module.exports = User;
