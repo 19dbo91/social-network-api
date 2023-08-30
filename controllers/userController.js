@@ -34,8 +34,13 @@ module.exports = {
     },
     async updateUser(req,res){
         try {
-            const user = await User.findOneAndUpdate({ _id: req.params.userId });
-
+            const userId = req.params.userId;
+            const {username, email}= req.body;
+            const user = await User.findOneAndUpdate(
+                { _id: userId },
+                { username, email }
+            );
+            console.log(user)
             if (!user) {
                 return res.status(404).json({ message: 'No user with that ID' });
             }
@@ -47,6 +52,9 @@ module.exports = {
     async deleteUser(req,res){
         try {
             const deletingUser = await User.findOneAndDelete({ _id: req.body.userId });
+            if(!deletingUser){
+                res.status(404).json(deletingUser); 
+            }
             res.status(200).json(deletingUser);
         } catch (err) {
             res.status(500).json(err);
@@ -56,18 +64,19 @@ module.exports = {
         try {
             
             const existingUser = await User.findOne({ _id: req.params.userId });
-            
+            // Checking user exists
             if (!existingUser) {
                 return res.status(404).json({ message: 'No user with that ID' });
             }
 
-            // Checking users friends first, quicker/shorter to check first
-            const friends = existingUser.friends;
-            const foundFriendIndex = friends.findIndex( (friend) => {
+            // Checking users friends first to reduce #api calls
+            let usersfriends = existingUser.friends;
+            const friendIndex = usersfriends.findIndex( (friend) => {
                 friend === req.params.friendId
             });
             
-            if (foundFriendIndex >= 0){
+            if (friendIndex >= 0){
+                
                 return res.status(200).json({ message: 'User already is friend with that user' });
             }
             
@@ -78,11 +87,16 @@ module.exports = {
             if (!friend){
                 return res.status(404).json({ message: 'No friend with that ID' });
             }
+            
+            const newFriendsList = usersfriends.push(req.params.friendId);
+            console.log(usersfriends)
+            const updatedFriends = await User.update(
+                {_id: req.params.userId},
+                {friends:newFriendsList}
+            )
+            
 
-
-            friends.push(req.params.friendId);
-
-            res.status(200).json(friends);
+            res.status(200).json(updatedFriends);
         } catch (err) {
             res.status(500).json(err);
         }

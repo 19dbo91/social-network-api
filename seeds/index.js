@@ -1,6 +1,7 @@
 const connection = require('../config/connection');
 const { User, Thought } = require('../models');
-const { userSeeds, thoughtSeeds } = require('../seeds');
+const userSeed = require('./userSeed');
+const thoughtSeed = require('../seeds/ThoughtSeed');
 
 connection.on('error', (err) => err);
 
@@ -14,14 +15,13 @@ connection.once('open', async () => {
     let thoughtsCheck = await connection.db.listCollections({name: 'thought'}).toArray();
     if(thoughtsCheck.length){ await connection.dropCollection('thought') }
 
-    //c
-
     // Creating db
-    await User.collection.insertMany(userSeeds);
-    await Thought.collection.insertMany(thoughtSeeds);
+    await User.collection.insertMany(userSeed);
+    await Thought.collection.insertMany(thoughtSeed);
 
     //Show tables
-    console.table(userSeeds);
+    console.table(userSeed);
+    console.table(thoughtSeed);
     console.info('Seeds planted! 🌱');
     process.exit(0);
 });

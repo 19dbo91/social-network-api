@@ -1,17 +1,18 @@
-//! SCHEMA ONLY
-const { Schema } = require('mongoose');
+const { Schema, Types } = require('mongoose');
+
+//Reaction //! (SCHEMA ONLY)
 const reactionSchema = new Schema (
     {
         reactionID: {
             type: Schema.Types.ObjectId,
-            required: true,            
+            default: () => new Types.ObjectId(),
         },
-        reactionBody: { // The user that created this thought
+        reactionBody: {
             type: String,
             required: true,
             maxLength: 280,
         },
-        username: { // The user that created this thought
+        username: { // The user that created this reaction
             type: String,
             required: true,
         },    
@@ -21,6 +22,9 @@ const reactionSchema = new Schema (
         },
     },
     {
+        toJSON: {
+            getters: true,
+          },
         id: false,
     }
 );
