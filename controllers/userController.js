@@ -11,10 +11,14 @@ module.exports = {
     },
     async getUser(req,res){ // // TODO: verify route - GOOD
         try {
-            const user = await User.findOne({ _id: req.params.userId });
+            const user = await User.findOne({ 
+                _id: req.params.userId,
+            });
 
             if (!user) {
-                return res.status(404).json({ message: 'No user with that ID' });
+                return res.status(404).json({
+                    message: 'No user with that ID',
+                 });
             }
             res.status(200).json(user);
         } catch (err) {
@@ -25,7 +29,7 @@ module.exports = {
         try {
             const newUser = await User.create({
                 username: req.body.username,
-                email: req.body.email
+                email: req.body.email,
             });
             res.status(200).json(newUser);
         } catch (err) {
@@ -42,19 +46,25 @@ module.exports = {
             );
             // console.log(user)
             if (!user) {
-                return res.status(404).json({ message: 'No user with that ID' });
+                return res.status(404).json({
+                    message: 'No user with that ID',
+                });
             }
             res.status(200).json(user);
         } catch (err) {
             res.status(500).json(err);
         }
     },
-    async deleteUser(req,res){ // // TODO: verify route - GOOD
+    async deleteUser(req,res){  // TODO: verify route - GOOD AND remove associated thoughts (import to use)
         try {
-            const deletingUser = await User.findOneAndDelete({ _id: req.params.userId });
+            const deletingUser = await User.findOneAndDelete({
+                _id: req.params.userId,
+            });
             
             if(!deletingUser){
-                res.status(404).json({ message: 'No user with that ID' }); 
+                res.status(404).json({
+                    message: 'No user with that ID',
+                }); 
             }
             res.status(200).json(deletingUser);
         } catch (err) {
@@ -62,31 +72,23 @@ module.exports = {
         }
     },
     async addToFriends(req,res){ // // TODO: verify route - GOOD
-        try {
-            
+        try {            
             const existingUser = await User.findOne({ _id: req.params.userId });
-            
-            
+
             // Checking user exists
-            if (!existingUser) {
-                return res.status(404).json({ message: 'No user with that ID' });
-            }
+            if (!existingUser) { return res.status(404).json({ message: 'No user with that ID' }); };
             
-            // Checking users friends first to reduce #api calls
-            let usersfriends = existingUser.friends;
-            const friendIndex = usersfriends.findIndex( (friend) => {
+            // Checking users friends first to reduce api calls
+            let userFriends = existingUser.friends;
+            const friendIndex = userFriends.findIndex( (friend) => {
                 friend === req.params.friendId
             });
-            if (friendIndex >= 0){
-                return res.status(200).json({ message: 'User already is friend with that user' });
-            }
+            if (friendIndex >= 0){ return res.status(304).json({ message: 'User already is friend with that user' }); };
             
 
             // Checking if friend exists 
             const newFriend = await User.findOne({ _id: req.params.friendId });
-            if (!newFriend){
-                return res.status(404).json({ message: 'No friend with that ID' });
-            }
+            if (!newFriend){ return res.status(404).json({ message: 'No friend with that ID' }); };
             
             // Update User list
             const newFriendsList = [...usersfriends, req.params.friendId];
@@ -102,25 +104,32 @@ module.exports = {
             res.status(500).json(err);
         }
     },
-    async removeFromFriends(req,res){
+    async removeFromFriends(req,res){ // TODO: verify route -
         try {
             const existingUser = await User.findOne({ _id: req.params.userId });
 
-            if (!existingUser) {
-                return res.status(404).json({ message: 'No user with that ID' });
-            } 
+            // Checking user exists
+            if (!existingUser) { return res.status(404).json({ message: 'No user with that ID' }); };
+            console.log("User identified")
 
-            const foundFriendIndex = existingUser.friends.findIndex( (friend) => {
-                friend === req.params.friendId
-            }); // O(n) + c
+            // Checking if friend exists first to reduce api calls
+            const newFriend = await User.findOne({ _id: req.params.friendId });
+            if (!newFriend){ return res.status(404).json({ message: 'No friend with that ID' }); };
+            console.log("Friend user identified")
 
-            if(foundFriendIndex === -1){
-                return res.status(404).json({ message: 'No friend with that ID' });
-            }else{
-                friends.splice(foundFriendIndex)
-            } // Splice uses neg.values too, keep in 'else' to avoid
-                
-            res.status(200).json({message: 'Deleted friend with that ID from that user friend list'});
+            
+            // Checking null friend list
+            if (!existingUser.friendCount){ return res.status(404).json({ message: 'Did not find friend under user list of friends' }); };
+            console.log("User is friends with them")
+
+            // Checking 
+            let usersFriends = existingUser.friends;
+            const friendIndex = usersFriends.findIndex( (friend) => { friend === req.params.friendId });         
+            if (friendIndex < 0){ return res.status(404).json({ message: 'Did not find friend under user list of friends' }); };
+            console.log(friendIndex)
+
+            friends.splice(friendIndex) //!NOTE: Splice can use negative values to check from right side of array               
+            res.status(200).json({message: 'Removed friend from user list of friends'});
         } catch (err) {
             res.status(500).json(err);
         }

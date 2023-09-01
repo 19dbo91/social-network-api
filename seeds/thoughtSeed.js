@@ -1,8 +1,8 @@
 const { Thought } = require('../models')
 const thoughtSeeds = [
     {
-        thoughtText: "This is a thought",
-        username: ""
+        thoughtText: "This is my old thought",
+        username: "Newman"
     },
     {
         thoughtText: "",
