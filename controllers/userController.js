@@ -80,9 +80,9 @@ module.exports = {
             
             // Checking users friends first to reduce api calls
             let userFriends = existingUser.friends;
-            const friendIndex = userFriends.findIndex( (friend) => {
+            const friendIndex = userFriends.findIndex( (friend) => 
                 friend === req.params.friendId
-            });
+            );console.log(friendIndex)
             if (friendIndex >= 0){ return res.status(304).json({ message: 'User already is friend with that user' }); };
             
 
@@ -95,7 +95,8 @@ module.exports = {
             console.log(newFriendsList)
             const updatedFriends = await User.updateOne(
                 {_id: req.params.userId},
-                {friends: newFriendsList}
+                {friends: newFriendsList},
+                {new: true}
             )
             console.log(updatedFriends)
 
