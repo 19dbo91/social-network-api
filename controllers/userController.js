@@ -39,10 +39,11 @@ module.exports = {
     async updateUser(req,res){ // // TODO: verify route - GOOD
         try {
             const userId = req.params.userId;
-            const {username, email}= req.body;
+            const { username, email }= req.body;
             const user = await User.findOneAndUpdate(
                 { _id: userId },
-                { username, email }
+                { username, email },
+                { new: true }
             );
             // console.log(user)
             if (!user) {
@@ -72,65 +73,101 @@ module.exports = {
         }
     },
     async addToFriends(req,res){ // // TODO: verify route - GOOD
-        try {            
-            const existingUser = await User.findOne({ _id: req.params.userId });
+        try {   
+            const { userId, friendId } = req.params;
+            const existingUser = await User.findOne({ _id: userId });
 
-            // Checking user exists
-            if (!existingUser) { return res.status(404).json({ message: 'No user with that ID' }); };
+            if ( !existingUser ) {
+                return res.status(404).json({
+                    message: 'No user with that ID'
+                });
+            };
+            console.log("User identified");
             
-            // Checking users friends first to reduce api calls
-            let userFriends = existingUser.friends;
-            const friendIndex = userFriends.findIndex( (friend) => 
-                friend === req.params.friendId
-            );console.log(friendIndex)
-            if (friendIndex >= 0){ return res.status(304).json({ message: 'User already is friend with that user' }); };
-            
+            let { friends } = existingUser;
+            const friendIndex = friends.findIndex( (friend) => 
+                friend == friendId
+            );
+            if ( friendIndex >= 0 ){
+                return res.status(400).json({
+                    message: 'User already is friend with that user'
+                });
+            };
+            console.log("User is not already friends");
 
-            // Checking if friend exists 
-            const newFriend = await User.findOne({ _id: req.params.friendId });
-            if (!newFriend){ return res.status(404).json({ message: 'No friend with that ID' }); };
+            const newFriend = await User.findOne({ _id: friendId });
+            if ( !newFriend ){
+                return res.status(404).json({
+                    message: 'No friend with that ID'
+                });
+            };
+            console.log("Friend user identified");
+
+            friends = [...friends, newFriend._id];
             
-            // Update User list
-            const newFriendsList = [...usersfriends, req.params.friendId];
-            console.log(newFriendsList)
-            const updatedFriends = await User.updateOne(
-                {_id: req.params.userId},
-                {friends: newFriendsList},
-                {new: true}
+            const updatedUser = await User.updateOne(
+                { _id: userId },
+                { friends },
+                { new: true }
             )
-            console.log(updatedFriends)
-
-            res.status(200).json(updatedFriends);
+            if ( !updatedUser ){
+                return res.status(500).json("Update failed");
+            }
+            res.status(200).json(updatedUser);
         } catch (err) {
             res.status(500).json(err);
         }
     },
     async removeFromFriends(req,res){ // TODO: verify route -
         try {
-            const existingUser = await User.findOne({ _id: req.params.userId });
 
-            // Checking user exists
-            if (!existingUser) { return res.status(404).json({ message: 'No user with that ID' }); };
+            const { userId, friendId } = req.params;
+            const existingUser = await User.findOne({ _id: userId });
+            if ( !existingUser ) {
+                return res.status(404).json({
+                    message: 'No user with that ID'
+                });
+            };
             console.log("User identified")
 
-            // Checking if friend exists first to reduce api calls
-            const newFriend = await User.findOne({ _id: req.params.friendId });
-            if (!newFriend){ return res.status(404).json({ message: 'No friend with that ID' }); };
+            if ( !existingUser.friendCount ){
+                return res.status(404).json({
+                    message: 'Did not find friend under user list of friends'
+                });
+            };
+            console.log("User friend group confirmed")
+
+            const { friends } = existingUser;
+            const friendIndex = friends.findIndex( (friend) => {
+                return friend == friendId;
+            });
+            console.log(friendIndex)
+            if (friendIndex < 0){
+                return res.status(404).json({
+                    message: 'Did not find friend under user list of friends'
+                });
+            };
+
+            const newFriend = await User.findOne({ _id: friendId });
+            if ( !newFriend ){
+                return res.status(404).json({
+                    message: 'No friend with that ID'
+                });
+            };
             console.log("Friend user identified")
 
-            
-            // Checking null friend list
-            if (!existingUser.friendCount){ return res.status(404).json({ message: 'Did not find friend under user list of friends' }); };
-            console.log("User is friends with them")
+            //! NOTE: Splice can use negative values to check from right side of array               
+            friends.splice(friendIndex, 1)
 
-            // Checking 
-            let usersFriends = existingUser.friends;
-            const friendIndex = usersFriends.findIndex( (friend) => { friend === req.params.friendId });         
-            if (friendIndex < 0){ return res.status(404).json({ message: 'Did not find friend under user list of friends' }); };
-            console.log(friendIndex)
-
-            friends.splice(friendIndex) //!NOTE: Splice can use negative values to check from right side of array               
-            res.status(200).json({message: 'Removed friend from user list of friends'});
+            const updatedUser = await User.updateOne(
+                { _id: userId },
+                { friends },
+                { new: true }
+            )
+            if ( !updatedUser ){
+                return res.status(500).json("Update failed");
+            }
+            res.status(200).json(updatedUser);
         } catch (err) {
             res.status(500).json(err);
         }

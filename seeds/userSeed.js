@@ -1,22 +1,21 @@
 const { User } = require('../models')
 const userSeeds = [
     {
-        username: 'Newman',
-        email:'myNewEmail@gmail.com',
-        //friends:[{_id}];
+        username: 'mainCharacter',
+        email:'mainCharacter@gmail.com',
     },
     {
-        username: 'bzzzzzzzzE',
-        email:'busyBoy@gmail.com',
+        username: 'outdated',
+        email:'outdated@gmail.com',
     },
     {
-        username: 'grappler',
-        email:'hugs4Free@gmail.com',
+        username: 'thoughtfulPerson',
+        email:'thoughtfulPerson@gmail.com',
     },
     {
-        username: 'grazeAnnaTummy',
-        email:'veganDoc@gmail.com',
-    }
+        username: 'HYPEReactive',
+        email:'HYPEReactive@gmail.com',
+    },
 ]
 
 

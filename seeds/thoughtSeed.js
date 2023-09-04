@@ -1,16 +1,16 @@
 const { Thought } = require('../models')
 const thoughtSeeds = [
     {
-        thoughtText: "This is my old thought",
-        username: "Newman"
+        thoughtText: "Copy this thought ID",
+        username: "thoughtfulPerson"
     },
     {
-        thoughtText: "",
-        username: ""
+        thoughtText: "Use this thought to add Reactions to",
+        username: "HYPEReactive"
     },
     {
-        thoughtText: "",
-        username: ""
+        thoughtText: "Post the thought below this",
+        username: "thoughtfulPerson"
     }
 ];
 
